@@ -27,7 +27,7 @@ JSON such as the following added as custom JSON to the stack:
   "sidekiq": {
     "YOUR_APP_NAME": {
       "slacker": {
-        "process_count": 2
+        "process_count": 2,
         "config" : {
           "concurrency": 5,
           "verbose": false,
@@ -36,7 +36,7 @@ JSON such as the following added as custom JSON to the stack:
       },
       "hard_worker": {
         "config": {
-          "concurrency": 40
+          "concurrency": 40,
           "queues": [
             ["often", 7],
             ["default", 5],
@@ -98,7 +98,7 @@ The layer's custom chef recipes should be associated with events as follows:
 
 * **Setup**: `opsworks_sidekiq::setup`
 * **Configure**: `opsworks_sidekiq::configure`
-* **Deploy**: `opsworks_sidekiq::deploy`
+* **Deploy**: `opsworks_sidekiq::deploy` or `opsworks_sidekiq::restart` (performs simple restart and does not deploy app code)
 * **Undeploy**: `opsworks_sidekiq::undeploy`
 * **Shutdown**: `opsworks_sidekiq::stop`
 
