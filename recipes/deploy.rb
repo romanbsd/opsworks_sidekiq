@@ -4,6 +4,10 @@ include_recipe 'deploy'
 
 node[:deploy].each do |application, deploy|
 
+  unless node[:sidekiq][application]
+    next
+  end
+
   if deploy[:application_type] != 'rails'
     Chef::Log.debug("Skipping opsworks_sidekiq::deploy application #{application} as it is not an Rails app")
     next
