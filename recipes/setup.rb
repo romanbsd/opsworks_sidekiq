@@ -51,21 +51,24 @@ node[:deploy].each do |application, deploy|
     workers = node[:sidekiq][application].to_hash.reject {|k,v| k.to_s =~ /restart_command|syslog/ }
     config_directory = "#{deploy[:deploy_to]}/shared/config"
 
-    workers.each do |worker, options|
-
-      # Convert attribute classes to plain old ruby objects
-      config = options[:config] ? options[:config].to_hash : {}
-      config.each do |k, v|
-        case v
-        when Chef::Node::ImmutableArray
-          config[k] = v.to_a
-        when Chef::Node::ImmutableMash
-          config[k] = v.to_hash
-        end
+    # Convert attribute classes to plain old ruby objects
+    convert = -> (v) do
+      case v
+      when Chef::Node::ImmutableArray
+        v.map(&convert)
+      when Chef::Node::ImmutableMash
+        v.each_with_object({}) { |(k,v), o| o[k] = convert.call(v) }
+      else
+        v
       end
+    end
+
+    workers.each do |worker, options|
+      config = options[:config] ? options[:config].to_hash : {}
+      config = convert.call(config)
 
       # Generate YAML string
-      yaml = YAML::dump(config)
+      yaml = YAML.dump(config)
 
       # Convert YAML string keys to symbol keys for sidekiq while preserving
       # indentation. (queues: to :queues:)
